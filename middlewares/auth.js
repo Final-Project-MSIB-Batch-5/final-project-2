@@ -1,5 +1,5 @@
 const { verifyToken } = require("../helpers/jwt");
-const { user } = require("../models");
+const { User } = require("../models");
 
 const authentication = async (req, res, next) => {
   try {
@@ -15,7 +15,7 @@ const authentication = async (req, res, next) => {
     // verify token
     const decode = verifyToken(token);
 
-    const userData = await user.findOne({
+    const userData = await User.findOne({
       where: {
         id: decode.id,
         email: decode.email,
@@ -42,4 +42,4 @@ const authentication = async (req, res, next) => {
   }
 };
 
-module.exports = authentication;
+module.exports = { authentication };
