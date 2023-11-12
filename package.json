@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node bin/http.js",
     "dev": "nodemon bin/http.js",
     "create-db:dev": "npx sequelize db:create --env development",
     "migrate-db:dev": "npx sequelize db:migrate --env development",
