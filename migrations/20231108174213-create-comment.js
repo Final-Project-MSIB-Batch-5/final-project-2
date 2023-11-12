@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Comments", {
+    await queryInterface.createTable("Comment", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -28,24 +28,24 @@ module.exports = {
       },
     });
 
-    await queryInterface.addConstraint("Comments", {
+    await queryInterface.addConstraint("Comment", {
       fields: ["UserId"],
       type: "foreign key",
-      name: "user_fk_comments",
+      name: "user_fk_comment",
       references: {
-        table: "Users",
+        table: "User",
         field: "id",
       },
       onDelete: "cascade",
       onUpdate: "cascade",
     });
 
-    await queryInterface.addConstraint("Comments", {
+    await queryInterface.addConstraint("Comment", {
       fields: ["PhotoId"],
       type: "foreign key",
-      name: "photo_fk_comments",
+      name: "photo_fk_comment",
       references: {
-        table: "Photos",
+        table: "Photo",
         field: "id",
       },
       onDelete: "cascade",
@@ -54,8 +54,8 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeConstraint("Comments", "user_fk_comments");
-    await queryInterface.removeConstraint("Comments", "photo_fk_comments");
-    await queryInterface.dropTable("Comments");
+    await queryInterface.removeConstraint("Comment", "user_fk_comment");
+    await queryInterface.removeConstraint("Comment", "photo_fk_comment");
+    await queryInterface.dropTable("Comment");
   },
 };

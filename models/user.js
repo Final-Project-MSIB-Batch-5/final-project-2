@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       this.hasMany(models.Photo, { foreignKey: "UserId" });
       this.hasMany(models.Comment, { foreignKey: "UserId" });
+      this.hasMany(models.SocialMedia, { foreignKey: "UserId" });
     }
   }
   User.init(
@@ -125,6 +126,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "User",
+      tableName: "User",
       hooks: {
         beforeCreate: (user) => {
           const hashedPassword = hashPassword(user.password);

@@ -13,36 +13,30 @@ module.exports = {
      * }], {});
      */
     await queryInterface.bulkInsert(
-      "SocialMedia",
+      "Photo",
       [
         {
-          name: "Instagram 1",
-          social_media_url: "https://www.instagram.com/",
+          poster_image_url: "https://source.unsplash.com/E49mqfvZOi4",
+          title: "Pemandangan",
+          caption: "Foto pemandangan di distrik 2",
           UserId: 1,
         },
         {
-          name: "Instagram 2",
-          social_media_url: "https://www.instagram.com/1",
+          poster_image_url: "https://source.unsplash.com/WBk4hrWKPA8",
+          title: "Pemandangan di kota",
+          caption: "Foto pemandangan di kota",
           UserId: 1,
         },
         {
-          name: "Instagram 3",
-          social_media_url: "https://www.instagram.com/2",
-          UserId: 1,
-        },
-        {
-          name: "Facebook 1",
-          social_media_url: "https://www.facebook.com/",
+          poster_image_url: "https://source.unsplash.com/1ctOFoMgGls",
+          title: "Pemandangan di jalan",
+          caption: "Foto pemandangan di jalan distrik 2",
           UserId: 2,
         },
         {
-          name: "Facebook 2",
-          social_media_url: "https://www.facebook.com/1",
-          UserId: 2,
-        },
-        {
-          name: "Facebook 3",
-          social_media_url: "https://www.facebook.com/2",
+          poster_image_url: "https://source.unsplash.com/4KSqp_5aYXw",
+          title: "Winter Night",
+          caption: "Foto keadaan jalan dimalam hari 2",
           UserId: 2,
         },
       ],
@@ -57,6 +51,6 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    await queryInterface.bulkDelete("SocialMedia", null, {});
+    await queryInterface.bulkDelete("Photo", null, {});
   },
 };

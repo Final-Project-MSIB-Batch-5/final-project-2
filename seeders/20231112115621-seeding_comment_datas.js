@@ -13,36 +13,26 @@ module.exports = {
      * }], {});
      */
     await queryInterface.bulkInsert(
-      "SocialMedia",
+      "Comment",
       [
         {
-          name: "Instagram 1",
-          social_media_url: "https://www.instagram.com/",
+          comment: "Nice",
+          PhotoId: 1,
           UserId: 1,
         },
         {
-          name: "Instagram 2",
-          social_media_url: "https://www.instagram.com/1",
+          comment: "Beautiful",
+          PhotoId: 1,
           UserId: 1,
         },
         {
-          name: "Instagram 3",
-          social_media_url: "https://www.instagram.com/2",
-          UserId: 1,
-        },
-        {
-          name: "Facebook 1",
-          social_media_url: "https://www.facebook.com/",
+          comment: "Not bad",
+          PhotoId: 2,
           UserId: 2,
         },
         {
-          name: "Facebook 2",
-          social_media_url: "https://www.facebook.com/1",
-          UserId: 2,
-        },
-        {
-          name: "Facebook 3",
-          social_media_url: "https://www.facebook.com/2",
+          comment: "Awesome",
+          PhotoId: 2,
           UserId: 2,
         },
       ],
@@ -57,6 +47,6 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    await queryInterface.bulkDelete("SocialMedia", null, {});
+    await queryInterface.bulkDelete("Comment", null, {});
   },
 };

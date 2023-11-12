@@ -92,7 +92,7 @@ class UserController {
         token: token,
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(error.code || 500).json({ error: error.message });
     }
   }
 
@@ -109,7 +109,7 @@ class UserController {
 
       const { userId } = req.params;
 
-      const data = await User.update(
+      const [arrowAffected, [updateDataUser]] = await User.update(
         {
           email,
           full_name,
@@ -128,21 +128,21 @@ class UserController {
         }
       );
 
-      if (!data[0]) {
+      if (arrowAffected === 0) {
         throw {
           code: 404,
-          message: "User tidak ditemukan",
+          message: "User not found.",
         };
       }
 
       res.status(200).json({
         user: {
-          email: data[1][0].email,
-          full_name: data[1][0].full_name,
-          username: data[1][0].username,
-          profile_image_url: data[1][0].profile_image_url,
-          age: data[1][0].age,
-          phone_number: data[1][0].phone_number,
+          email: updateDataUser.email,
+          full_name: updateDataUser.full_name,
+          username: updateDataUser.username,
+          profile_image_url: updateDataUser.profile_image_url,
+          age: updateDataUser.age,
+          phone_number: updateDataUser.phone_number,
         },
       });
     } catch (error) {
@@ -175,14 +175,14 @@ class UserController {
       if (!data) {
         throw {
           code: 404,
-          message: "User tidak ditemukan",
+          message: "User not found.",
         };
       }
       res
         .status(200)
         .json({ message: "Your account has been successfully deleted" });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(error.code || 500).json({ message: error.message });
     }
   }
 }

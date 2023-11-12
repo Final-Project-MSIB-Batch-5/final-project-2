@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Photos", {
+    await queryInterface.createTable("Photo", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -31,12 +31,12 @@ module.exports = {
       },
     });
 
-    await queryInterface.addConstraint("Photos", {
+    await queryInterface.addConstraint("Photo", {
       fields: ["UserId"],
       type: "foreign key",
-      name: "user_fk_photos",
+      name: "user_fk_photo",
       references: {
-        table: "Users",
+        table: "User",
         field: "id",
       },
       onDelete: "cascade",
@@ -45,7 +45,7 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeConstraint("Photos", "user_fk_photos");
-    await queryInterface.dropTable("Photos");
+    await queryInterface.removeConstraint("Photo", "user_fk_photo");
+    await queryInterface.dropTable("Photo");
   },
 };
