@@ -37,7 +37,7 @@ const userDataUpdateTest = {
 let token;
 
 // test api register
-describe("POST /user/register", () => {
+describe("POST /users/register", () => {
   beforeAll(async () => {
     try {
       await User.destroy({ where: {} });
@@ -96,7 +96,7 @@ describe("POST /user/register", () => {
 });
 
 // test api login
-describe("POST /user/login", () => {
+describe("POST /users/login", () => {
   // response success
   it("Should be response 200 status code", (done) => {
     request(app)
@@ -258,7 +258,7 @@ describe("PUT /user/:UserId (response updatedUserById)", () => {
 });
 
 // test api deleted user
-describe("DELETE /user/:UserId (response deletedUserById)", () => {
+describe("DELETE /users/:UserId (response deletedUserById)", () => {
   let data;
   beforeAll(async () => {
     try {
@@ -297,7 +297,7 @@ describe("DELETE /user/:UserId (response deletedUserById)", () => {
   // response error (user not found)
   it("Should be response 404 status code", (done) => {
     request(app)
-      .delete(`/users/200`)
+      .delete(`/users/2000`)
       .set("token", token)
       .end((err, res) => {
         if (err) return done(err);
