@@ -16,7 +16,7 @@ const userData = {
 describe("POST /comments", () => {
   let UserId;
   let PhotoId;
-  let token = "";
+  let token;
 
   beforeAll(async () => {
     try {
@@ -25,6 +25,7 @@ describe("POST /comments", () => {
       token = generateToken({
         id: user.id,
         email: user.email,
+        username: user.username,
       });
       const photoData = {
         title: "photo1",
@@ -75,7 +76,7 @@ describe("POST /comments", () => {
   });
 
   // Fail Testing Create Comment Because Comment Column Empty
-  it("should be response 400 status code ", (done) => {
+  it("should be response 422 status code ", (done) => {
     request(app)
       .post("/comments")
       .set("token", token)
@@ -87,12 +88,13 @@ describe("POST /comments", () => {
         if (err) {
           done(err);
         } else {
-          expect(res.statusCode).toEqual(400);
+          expect(res.statusCode).toEqual(422);
           expect(typeof res.body).toEqual("object");
-          expect(res.body).toHaveProperty("name");
           expect(res.body).toHaveProperty("errors");
-          expect(res.body.name).toEqual("SequelizeValidationError");
-          expect(res.body.errors[0].type).toEqual("Validation error");
+          expect(res.body.errors[0]).toHaveProperty("field");
+          expect(res.body.errors[0]).toHaveProperty("message");
+          expect(res.body.errors[0].field).toEqual("comment");
+          expect(res.body.errors[0].message).toEqual("Comment be required.");
           done();
         }
       });
@@ -110,12 +112,12 @@ describe("POST /comments", () => {
         if (err) {
           done(err);
         } else {
-          expect(res.statusCode).toEqual(401);
+          expect(res.status).toEqual(401);
+          expect(res.unauthorized).toEqual(true);
           expect(typeof res.body).toEqual("object");
-          expect(res.body).toHaveProperty("name");
-          expect(res.body).toHaveProperty("devMassage");
-          expect(res.body.devMassage).toHaveProperty("name");
-          expect(res.body.devMassage).toHaveProperty("message");
+          expect(res.body).toHaveProperty("message");
+          expect(typeof res.body.message).toEqual("string");
+          expect(res.body.message).toEqual("Token not provided!");
           done();
         }
       });
@@ -131,6 +133,7 @@ describe("GET /comments", () => {
       token = generateToken({
         id: user.id,
         email: user.email,
+        username: user.username,
       });
 
       const photoData = {
@@ -166,9 +169,10 @@ describe("GET /comments", () => {
         } else {
           expect(res.statusCode).toEqual(200);
           expect(res.type).toEqual("application/json");
+          expect(res.body).toBeDefined();
           expect(typeof res.body).toEqual("object");
-          expect(res.body).toHaveProperty("Comments");
-          expect(Array.isArray(res.body.Comments)).toBe(true);
+          expect(res.body).toHaveProperty("comments");
+          expect(Array.isArray(res.body.comments)).toBe(true);
           done();
         }
       });
@@ -184,10 +188,10 @@ describe("GET /comments", () => {
         } else {
           expect(res.statusCode).toEqual(401);
           expect(typeof res.body).toEqual("object");
-          expect(res.body).toHaveProperty("name");
-          expect(res.body).toHaveProperty("devMassage");
-          expect(res.body.devMassage).toHaveProperty("name");
-          expect(res.body.devMassage).toHaveProperty("message");
+          expect(res.body).toHaveProperty("message");
+          expect(res.body).toBeDefined();
+          expect(typeof res.body.message).toEqual("string");
+          expect(res.body.message).toEqual("Token not provided!");
           done();
         }
       });
@@ -196,7 +200,7 @@ describe("GET /comments", () => {
 
 describe("PUT /comments/:id", () => {
   let commentId;
-  let token = "";
+  let token;
 
   beforeAll(async () => {
     try {
@@ -204,6 +208,7 @@ describe("PUT /comments/:id", () => {
       token = generateToken({
         id: user.id,
         email: user.email,
+        username: user.username,
       });
       const photoData = {
         title: "photo1",
@@ -273,17 +278,17 @@ describe("PUT /comments/:id", () => {
         } else {
           expect(res.statusCode).toEqual(401);
           expect(typeof res.body).toEqual("object");
-          expect(res.body).toHaveProperty("name");
-          expect(res.body).toHaveProperty("devMassage");
-          expect(res.body.devMassage).toHaveProperty("name");
-          expect(res.body.devMassage).toHaveProperty("message");
+          expect(res.body).toHaveProperty("message");
+          expect(res.body).toBeDefined();
+          expect(typeof res.body.message).toEqual("string");
+          expect(res.body.message).toEqual("Token not provided!");
           done();
         }
       });
   });
 
   // Fail Testing Update Comment Because Column Comment Empty
-  it("should be respond with 401 status code", (done) => {
+  it("should be respond with 422 status code", (done) => {
     request(app)
       .put(`/comments/${commentId}`)
       .set("token", token)
@@ -294,22 +299,22 @@ describe("PUT /comments/:id", () => {
         if (err) {
           done(err);
         } else {
-          expect(res.statusCode).toEqual(401);
+          expect(res.statusCode).toEqual(422);
           expect(typeof res.body).toEqual("object");
-          expect(res.body).toHaveProperty("name");
           expect(res.body).toHaveProperty("errors");
-          expect(res.body.name).toEqual("SequelizeValidationError");
-          expect(res.body.errors[0].type).toEqual("Validation error");
+          expect(res.body.errors[0]).toHaveProperty("field");
+          expect(res.body.errors[0]).toHaveProperty("message");
+          expect(Array.isArray(res.body.errors)).toBe(true);
           done();
         }
       });
   });
 
   // Fail Testing Update Comment Because Unauthorized
-  it("should be respond with 401 status code", (done) => {
+  it("should be respond with 404 status code", (done) => {
     request(app)
-      .put(`/comments/${commentId}`)
-      .set("token", "invalid-token")
+      .put(`/comments/9999`)
+      .set("token", token)
       .send({
         comment: "updated comment",
       })
@@ -317,12 +322,12 @@ describe("PUT /comments/:id", () => {
         if (err) {
           done(err);
         } else {
-          expect(res.statusCode).toEqual(401);
+          expect(res.statusCode).toEqual(404);
           expect(typeof res.body).toEqual("object");
-          expect(res.body).toHaveProperty("name");
-          expect(res.body).toHaveProperty("devMassage");
-          expect(res.body.devMassage).toHaveProperty("name");
-          expect(res.body.devMassage).toHaveProperty("message");
+          expect(res.body).toHaveProperty("message");
+          expect(res.body).toBeDefined();
+          expect(typeof res.body.message).toEqual("string");
+          expect(res.body.message).toEqual("Comment not found.");
           done();
         }
       });
@@ -331,7 +336,7 @@ describe("PUT /comments/:id", () => {
 
 describe("DELETE /comments/:id", () => {
   let commentId;
-  let token = "";
+  let token;
 
   beforeAll(async () => {
     try {
@@ -339,6 +344,7 @@ describe("DELETE /comments/:id", () => {
       token = generateToken({
         id: user.id,
         email: user.email,
+        username: user.username,
       });
       const photoData = {
         title: "photo1",
@@ -382,6 +388,7 @@ describe("DELETE /comments/:id", () => {
           expect(res.statusCode).toEqual(200);
           expect(res.type).toEqual("application/json");
           expect(res.body).toHaveProperty("message");
+          expect(res.body).toBeDefined();
           expect(typeof res.body).toEqual("object");
           expect(res.body.message).toEqual(
             "Your comment has been successfully deleted"
@@ -401,30 +408,52 @@ describe("DELETE /comments/:id", () => {
         } else {
           expect(res.statusCode).toEqual(401);
           expect(typeof res.body).toEqual("object");
-          expect(res.body).toHaveProperty("name");
-          expect(res.body).toHaveProperty("devMassage");
-          expect(res.body.devMassage).toHaveProperty("name");
-          expect(res.body.devMassage).toHaveProperty("message");
+          expect(res.body).toBeDefined();
+          expect(res.body).toHaveProperty("message");
+          expect(typeof res.body.message).toEqual("string");
+          expect(res.body.message).toEqual("Token not provided!");
           done();
         }
       });
   });
 
   // Fail Testing Delete Comment Because Unauthorized
-  it("should be respond with 401 status code", (done) => {
+  it("should be respond with 404 status code", (done) => {
     request(app)
       .delete(`/comments/${commentId}`)
-      .set("token", "invalid-token")
+      .set("token", token)
       .end((err, res) => {
         if (err) {
           done(err);
         } else {
-          expect(res.statusCode).toEqual(401);
+          expect(res.statusCode).toEqual(404);
           expect(typeof res.body).toEqual("object");
-          expect(res.body).toHaveProperty("name");
-          expect(res.body).toHaveProperty("devMassage");
-          expect(res.body.devMassage).toHaveProperty("name");
-          expect(res.body.devMassage).toHaveProperty("message");
+          expect(res.body).toBeDefined();
+          expect(res.body).toHaveProperty("message");
+          expect(typeof res.body.message).toEqual("string");
+          expect(res.body.message).toEqual("Comment not found.");
+          done();
+        }
+      });
+  });
+
+  // Fail Testing Delete Comment Because commentId params not int
+  it("should be respond with 400 status code", (done) => {
+    request(app)
+      .delete(`/comments/sssss`)
+      .set("token", token)
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        } else {
+          expect(res.statusCode).toEqual(400);
+          expect(typeof res.body).toEqual("object");
+          expect(res.body).toBeDefined();
+          expect(res.body).toHaveProperty("message");
+          expect(typeof res.body.message).toEqual("string");
+          expect(res.body.message).toEqual(
+            "Invalid commentId. It should be an integer."
+          );
           done();
         }
       });

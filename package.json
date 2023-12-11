@@ -10,9 +10,9 @@
     "migrate-db:dev": "npx sequelize db:migrate --env development",
     "create-db:prod": "npx sequelize db:create --env production",
     "migrate-db:prod": "npx sequelize db:migrate --env production",
-    "db:create:test": "npx sequelize db:create --env test",
-    "db:migrate:test": "npx sequelize db:migrate --env test",
-    "test": "SET NODE_ENV=test && jest --detectOpenHandles"
+    "db:create:test": "cross-env NODE_ENV=test npx sequelize db:create",
+    "db:migrate:test": "cross-env NODE_ENV=test npx sequelize db:migrate",
+    "test": "cross-env NODE_ENV=test jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +26,7 @@
     "sequelize": "^6.34.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
     "sequelize-cli": "^6.6.2",

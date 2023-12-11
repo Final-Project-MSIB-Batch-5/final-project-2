@@ -115,6 +115,15 @@ class CommentController {
     try {
       const { commentId } = req.params;
 
+      const parsedCommentId = parseInt(commentId);
+
+      if (isNaN(parsedCommentId)) {
+        throw {
+          code: 400,
+          message: "Invalid commentId. It should be an integer.",
+        };
+      }
+
       const data = await Comment.destroy({
         where: {
           id: commentId,

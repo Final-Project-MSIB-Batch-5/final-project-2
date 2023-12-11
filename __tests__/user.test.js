@@ -85,6 +85,8 @@ describe("POST /users/register", () => {
 
         expect(res.status).toBe(422);
         expect(res.body).toHaveProperty("errors");
+        expect(typeof res.body).toEqual("object");
+        expect(Array.isArray(res.body.errors)).toBe(true);
         expect(res.body.errors).toBeDefined();
         res.body.errors.map((error) => {
           expect(error).toHaveProperty("field");
@@ -106,6 +108,7 @@ describe("POST /users/login", () => {
         if (err) done(err);
 
         expect(res.status).toBe(200);
+        expect(typeof res.body).toEqual("object");
         expect(res.body).toHaveProperty("token");
         expect(res.body).toBeDefined();
         expect(res.body.token).toBeDefined();
@@ -124,6 +127,7 @@ describe("POST /users/login", () => {
         if (err) done(err);
 
         expect(res.status).toBe(404);
+        expect(typeof res.body).toEqual("object");
         expect(res.body).toHaveProperty("error");
         expect(res.body).toBeDefined();
         expect(res.body.error).toBeDefined();
@@ -141,6 +145,7 @@ describe("POST /users/login", () => {
         if (err) done(err);
 
         expect(res.status).toBe(401);
+        expect(typeof res.body).toEqual("object");
         expect(res.body).toHaveProperty("error");
         expect(res.body).toBeDefined();
         expect(res.body.error).toBeDefined();
@@ -194,6 +199,8 @@ describe("PUT /user/:UserId (response updatedUserById)", () => {
         if (err) done(err);
 
         expect(res.status).toBe(422);
+        expect(typeof res.body).toEqual("object");
+        expect(res.body).toBeDefined();
         expect(res.body).toHaveProperty("errors");
         expect(res.body.errors).toBeDefined();
         res.body.errors.map((error) => {
@@ -204,7 +211,7 @@ describe("PUT /user/:UserId (response updatedUserById)", () => {
       });
   });
 
-  // response error 404
+  // response error 404 (user not found)
   it("Should be response 404 status code", (done) => {
     request(app)
       .put(`/users/2000`)

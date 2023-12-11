@@ -81,7 +81,14 @@ class SocialMediaController {
 
       if (updatedUser[0] == 1) {
         res.status(200).json({
-          social_media: updatedUser[1],
+          social_media: {
+            id: updatedUser[1][0].id,
+            name: updatedUser[1][0].name,
+            social_media_url: updatedUser[1][0].social_media_url,
+            UserId: updatedUser[1][0].UserId,
+            updatedAt: updatedUser[1][0].updatedAt,
+            createdAt: updatedUser[1][0].createdAt,
+          },
         });
       } else {
         throw {
@@ -106,8 +113,16 @@ class SocialMediaController {
   static async deleteSocialmediaById(req, res) {
     try {
       const { socialMediaId } = req.params;
+      const parsedSocialMediaId = parseInt(socialMediaId);
+
+      if (isNaN(parsedSocialMediaId)) {
+        throw {
+          code: 400,
+          message: "Invalid socialMediaId. It should be an integer.",
+        };
+      }
       const deletedSocmed = await SocialMedia.destroy({
-        where: { id: socialMediaId, UserId: req.userData.id },
+        where: { id: parsedSocialMediaId, UserId: req.userData.id },
       });
 
       if (deletedSocmed) {

@@ -88,7 +88,9 @@ describe("POST /photos", () => {
         if (err) done(err);
 
         expect(res.status).toBe(422);
+        expect(typeof res.body).toEqual("object");
         expect(res.body).toHaveProperty("errors");
+        expect(Array.isArray(res.body.errors)).toBe(true);
         expect(res.body.errors).toBeDefined();
         res.body.errors.map((error) => {
           expect(error).toHaveProperty("field");
@@ -131,6 +133,7 @@ describe("GET /photos", () => {
 
         expect(typeof res.body).toEqual("object");
         expect(res.body).toHaveProperty("photos");
+        expect(res.body).toBeDefined();
         expect(res.body.photos).toBeDefined();
         expect(Array.isArray(res.body.photos)).toBe(true);
         res.body.photos.map((photo) => {
@@ -142,7 +145,7 @@ describe("GET /photos", () => {
       });
   });
 
-  // response error 401
+  // response error 401 (token not found)
   it("Should be response 401 status code", (done) => {
     request(app)
       .get("/photos")
@@ -196,7 +199,7 @@ describe("PUT /photos/photoId", () => {
       });
   });
 
-  // response error 401
+  // response error 401 (token not found)
   it("Should be response 401 status code", (done) => {
     request(app)
       .put(`/photos/${photoId}`)
@@ -226,6 +229,8 @@ describe("PUT /photos/photoId", () => {
         expect(typeof res.body).toEqual("object");
         expect(res.body).toBeDefined();
         expect(res.body).toHaveProperty("errors");
+        expect(res.body.errors).toBeDefined();
+        expect(Array.isArray(res.body.errors)).toBe(true);
         res.body.errors.map((error) => {
           expect(error).toHaveProperty("field");
           expect(error).toHaveProperty("message");
@@ -286,6 +291,26 @@ describe("DELETE /photos/photoId", () => {
         expect(res.body).toHaveProperty("message");
         expect(typeof res.body.message).toEqual("string");
         expect(res.body.message).toEqual("Photo not found.");
+        done();
+      });
+  });
+
+  // response error 400 (photoId params not int)
+  it("Should be response 400 status code", (done) => {
+    request(app)
+      .delete(`/photos/ssss`)
+      .set("token", token)
+      .end((err, res) => {
+        if (err) return done(err);
+
+        expect(res.status).toBe(400);
+        expect(typeof res.body).toEqual("object");
+        expect(res.body).toBeDefined();
+        expect(res.body).toHaveProperty("message");
+        expect(typeof res.body.message).toEqual("string");
+        expect(res.body.message).toEqual(
+          "Invalid photoId. It should be an integer."
+        );
         done();
       });
   });

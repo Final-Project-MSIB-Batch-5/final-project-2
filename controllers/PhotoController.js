@@ -114,6 +114,13 @@ class PhotoController {
   static async deletePhotoById(req, res) {
     try {
       const { photoId } = req.params;
+      const parsedPhotoId = parseInt(photoId);
+      if (isNaN(parsedPhotoId)) {
+        throw {
+          code: 400,
+          message: "Invalid photoId. It should be an integer.",
+        };
+      }
       const data = await Photo.destroy({
         where: {
           id: photoId,
