@@ -7,6 +7,19 @@ class CommentController {
     try {
       const { comment, PhotoId } = req.body;
 
+      const photo = await Photo.findOne({
+        where: {
+          id: PhotoId,
+        },
+      });
+
+      if (!photo) {
+        throw {
+          code: 404,
+          message: "Photo not found.",
+        };
+      }
+
       const data = await Comment.create({
         comment,
         PhotoId,
