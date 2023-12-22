@@ -37,18 +37,23 @@ const photoDataEmptyTest = {
 
 let token;
 let dataUser;
+let dataUserCreate;
 let photoId;
+let authLogin;
 describe("POST /photos", () => {
   beforeAll(async () => {
     try {
       await Photo.destroy({ where: {} });
       await User.destroy({ where: {} });
-      dataUser = await User.create(userDataTest);
-      token = generateToken({
-        id: dataUser.id,
-        email: dataUser.email,
-        username: dataUser.username,
-      });
+      dataUserCreate = await request(app)
+        .post("/users/register")
+        .send(userDataTest);
+      dataUser = await User.findOne({ where: { email: userDataTest.email } });
+      authLogin = await request(app)
+        .post("/users/login")
+        .send({ email: userDataTest.email, password: userDataTest.password });
+
+      token = authLogin.body.token;
     } catch (error) {
       console.log(error);
     }

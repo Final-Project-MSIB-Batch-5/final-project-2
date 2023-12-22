@@ -13,37 +13,32 @@ const userData = {
   phone_number: "081273849087",
 };
 
-describe("POST /comments", () => {
-  let UserId;
-  let PhotoId;
-  let token;
+let UserId;
+let PhotoId;
+let token;
+let authLogin;
+let commentId;
 
+describe("POST /comments", () => {
   beforeAll(async () => {
     try {
-      const user = await User.create(userData);
+      await request(app).post("/users/register").send(userData);
+      const user = await User.findOne({ where: { email: userData.email } });
       UserId = user.id;
-      token = generateToken({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      });
+      authLogin = await request(app)
+        .post("/users/login")
+        .send({ email: userData.email, password: userData.password });
+      token = authLogin.body.token;
       const photoData = {
         title: "photo1",
         caption: "photo1",
         poster_image_url: "photo1.com",
-        userId: UserId,
       };
-      const photo = await Photo.create(photoData);
-      PhotoId = photo.id;
-    } catch (err) {
-      console.log(err);
-    }
-  });
-  afterAll(async () => {
-    try {
-      await User.destroy({ where: {} });
-      await Photo.destroy({ where: {} });
-      await Comment.destroy({ where: {} });
+      const photo = await request(app)
+        .post("/photos")
+        .set("token", token)
+        .send(photoData);
+      PhotoId = photo.body.id;
     } catch (err) {
       console.log(err);
     }
@@ -70,6 +65,7 @@ describe("POST /comments", () => {
           expect(res.body.comment).toHaveProperty("PhotoId");
           expect(res.body.comment).toHaveProperty("updatedAt");
           expect(res.body.comment).toHaveProperty("createdAt");
+          commentId = res.body.comment.id;
           done();
         }
       });
@@ -125,39 +121,6 @@ describe("POST /comments", () => {
 });
 
 describe("GET /comments", () => {
-  let token = "";
-
-  beforeAll(async () => {
-    try {
-      const user = await User.create(userData);
-      token = generateToken({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      });
-
-      const photoData = {
-        title: "photo1",
-        caption: "photo1",
-        poster_image_url: "photo1.com",
-        userId: user.id,
-      };
-      await Photo.create(photoData);
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
-  afterAll(async () => {
-    try {
-      await User.destroy({ where: {} });
-      await Photo.destroy({ where: {} });
-      await Comment.destroy({ where: {} });
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
   // Success Testing Get Comment
   it("should be respond with 200 status code", (done) => {
     request(app)
@@ -199,47 +162,6 @@ describe("GET /comments", () => {
 });
 
 describe("PUT /comments/:id", () => {
-  let commentId;
-  let token;
-
-  beforeAll(async () => {
-    try {
-      const user = await User.create(userData);
-      token = generateToken({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      });
-      const photoData = {
-        title: "photo1",
-        caption: "photo1",
-        poster_image_url: "photo1.com",
-        userId: user.id,
-      };
-      const photo = await Photo.create(photoData);
-
-      const commentData = {
-        comment: "initial comment",
-        UserId: user.id,
-        PhotoId: photo.id,
-      };
-      const comment = await Comment.create(commentData);
-      commentId = comment.id;
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
-  afterAll(async () => {
-    try {
-      await User.destroy({ where: {} });
-      await Photo.destroy({ where: {} });
-      await Comment.destroy({ where: {} });
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
   // Success Testing Update Comment
   it("should respond with 200 status code and updated comment", (done) => {
     request(app)
@@ -335,37 +257,6 @@ describe("PUT /comments/:id", () => {
 });
 
 describe("DELETE /comments/:id", () => {
-  let commentId;
-  let token;
-
-  beforeAll(async () => {
-    try {
-      const user = await User.create(userData);
-      token = generateToken({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      });
-      const photoData = {
-        title: "photo1",
-        caption: "photo1",
-        poster_image_url: "photo1.com",
-        userId: user.id,
-      };
-      const photo = await Photo.create(photoData);
-
-      const commentData = {
-        comment: "initial comment",
-        UserId: user.id,
-        PhotoId: photo.id,
-      };
-      const comment = await Comment.create(commentData);
-      commentId = comment.id;
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
   afterAll(async () => {
     try {
       await User.destroy({ where: {} });
@@ -374,28 +265,6 @@ describe("DELETE /comments/:id", () => {
     } catch (err) {
       console.log(err);
     }
-  });
-
-  // Success Testing Delete Comment
-  it("should be respond with 200 status code", (done) => {
-    request(app)
-      .delete(`/comments/${commentId}`)
-      .set("token", token)
-      .end((err, res) => {
-        if (err) {
-          done(err);
-        } else {
-          expect(res.statusCode).toEqual(200);
-          expect(res.type).toEqual("application/json");
-          expect(res.body).toHaveProperty("message");
-          expect(res.body).toBeDefined();
-          expect(typeof res.body).toEqual("object");
-          expect(res.body.message).toEqual(
-            "Your comment has been successfully deleted"
-          );
-          done();
-        }
-      });
   });
 
   // Fail Testing Delete Comment Because No Token
@@ -420,7 +289,7 @@ describe("DELETE /comments/:id", () => {
   // Fail Testing Delete Comment Because Unauthorized
   it("should be respond with 404 status code", (done) => {
     request(app)
-      .delete(`/comments/${commentId}`)
+      .delete(`/comments/9999`)
       .set("token", token)
       .end((err, res) => {
         if (err) {
@@ -453,6 +322,28 @@ describe("DELETE /comments/:id", () => {
           expect(typeof res.body.message).toEqual("string");
           expect(res.body.message).toEqual(
             "Invalid commentId. It should be an integer."
+          );
+          done();
+        }
+      });
+  });
+
+  // Success Testing Delete Comment
+  it("should be respond with 200 status code", (done) => {
+    request(app)
+      .delete(`/comments/${commentId}`)
+      .set("token", token)
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        } else {
+          expect(res.statusCode).toEqual(200);
+          expect(res.type).toEqual("application/json");
+          expect(res.body).toHaveProperty("message");
+          expect(res.body).toBeDefined();
+          expect(typeof res.body).toEqual("object");
+          expect(res.body.message).toEqual(
+            "Your comment has been successfully deleted"
           );
           done();
         }

@@ -1,6 +1,6 @@
 const app = require("../app");
 const request = require("supertest");
-const { User, Comment, SocialMedia } = require("../models");
+const { User, SocialMedia } = require("../models");
 const { generateToken } = require("../helpers/jwt");
 
 const userData = {
@@ -12,28 +12,20 @@ const userData = {
   age: 20,
   phone_number: "081273849087",
 };
-
+let UserId;
+let token;
+let authLogin;
+let socmedId;
 describe("POST /socialmedias", () => {
-  let UserId;
-  let token;
-
   beforeAll(async () => {
     try {
-      const user = await User.create(userData);
-      UserId = user.id;
-      token = generateToken({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  });
-  afterAll(async () => {
-    try {
-      await User.destroy({ where: {} });
-      await Comment.destroy({ where: {} });
+      await request(app).post("/users/register").send(userData);
+      const dataUser = await User.findOne({ where: { email: userData.email } });
+      UserId = dataUser.id;
+      authLogin = await request(app)
+        .post("/users/login")
+        .send({ email: userData.email, password: userData.password });
+      token = authLogin.body.token;
     } catch (err) {
       console.log(err);
     }
@@ -62,6 +54,7 @@ describe("POST /socialmedias", () => {
         expect(res.body.social_media).toHaveProperty("social_media_url");
         expect(res.body.social_media).toHaveProperty("updatedAt");
         expect(res.body.social_media).toHaveProperty("createdAt");
+        socmedId = res.body.social_media.id;
         done();
       });
   });
@@ -116,34 +109,6 @@ describe("POST /socialmedias", () => {
 });
 
 describe("GET /socialmedias", () => {
-  let token;
-
-  beforeAll(async () => {
-    try {
-      const user = await User.create(userData);
-
-      token = generateToken({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      });
-      await SocialMedia.create({
-        name: "test",
-        social_media_url: "test.com",
-        UserId: user.id,
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  });
-  afterAll(async () => {
-    try {
-      await User.destroy({ where: {} });
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
   // Success Testing Get Social Media
   it("should send response with 200 status code", (done) => {
     request(app)
@@ -185,39 +150,6 @@ describe("GET /socialmedias", () => {
 });
 
 describe("PUT /socialmedias/:id", () => {
-  let UserId;
-  let token;
-  let socmedId;
-
-  beforeAll(async () => {
-    try {
-      const user = await User.create(userData);
-      UserId = user.id;
-      token = generateToken({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      });
-      socmedData = {
-        name: "tester",
-        social_media_url: "tester.com",
-        UserId: UserId,
-      };
-      const socmed = await SocialMedia.create(socmedData);
-      socmedId = socmed.id;
-    } catch (err) {
-      console.log(err);
-    }
-  });
-  afterAll(async () => {
-    try {
-      await User.destroy({ where: {} });
-      await SocialMedia.destroy({ where: {} });
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
   // Error for not including token
   it("should send response with 401 status code", (done) => {
     request(app)
@@ -325,31 +257,6 @@ describe("PUT /socialmedias/:id", () => {
 });
 
 describe("DELETE /socialmedias/:id", () => {
-  let UserId;
-  let token;
-  let socmedId;
-
-  beforeAll(async () => {
-    try {
-      const user = await User.create(userData);
-      UserId = user.id;
-
-      token = generateToken({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      });
-      const socmedData = {
-        name: "tester",
-        social_media_url: "tester.com",
-        UserId: UserId,
-      };
-      const socmed = await SocialMedia.create(socmedData);
-      socmedId = socmed.id;
-    } catch (err) {
-      console.log(err);
-    }
-  });
   afterAll(async () => {
     try {
       await User.destroy({ where: {} });

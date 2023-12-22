@@ -274,11 +274,12 @@ describe("DELETE /users/:UserId (response deletedUserById)", () => {
           email: userDataUpdateTest.email,
         },
       });
-      token = generateToken({
-        id: data.id,
-        email: data.email,
-        username: data.username,
-      });
+
+      const auth = await request(app)
+        .post("/users/login")
+        .send({ email: data.email, password: userDataTest.password });
+
+      token = auth.body.token;
     } catch (error) {
       console.log(error);
     }
