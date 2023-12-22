@@ -13,3 +13,8 @@ Kelompok 10
 
 1. Muhammad Ravi
 2. Ade Gaffur
+
+Test harus running setelah menjalankan command berikut
+    - npm run db:create:test
+    - npm run db:migrate:test
+    - npm run test
